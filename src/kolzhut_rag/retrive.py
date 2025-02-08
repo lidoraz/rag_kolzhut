@@ -2,9 +2,10 @@ import sqlite3
 import faiss
 from openai import OpenAI
 import os
+import numpy as np
 import json
-from encode_and_store import load_model, setup_database, retrieve_similar_pages, retrieve_content_by_url
-
+from encode_and_store import setup_database, retrieve_content_by_url, get_embedding_provider
+from consts import EMBEDDING_PROVIDER
 
 def load_faiss_index(filename='faiss_index.faiss'):
     return faiss.read_index(filename)
@@ -24,6 +25,7 @@ def get_openai_api_key():
 
 client = OpenAI(api_key=get_openai_api_key())
 
+
 def get_openai_response(user_query, context_text):
     try:
         # Call GPT-4o-mini
@@ -42,28 +44,57 @@ def get_openai_response(user_query, context_text):
         return "Error: Failed to get response from OpenAI"
 
 
+def get_openai_embedding(text):
+    try:
+        response = client.embeddings.create(
+            model="text-embedding-ada-002",
+            input=text
+        )
+        embedding = response['data'][0]['embedding']
+        return embedding
+    except Exception as e:
+        print(f"Error getting OpenAI embedding: {e}")
+        return None
+
+def cosine_similarity(a, b):
+    return sum(x*y for x, y in zip(a, b)) / (sum(x**2 for x in a)**0.5 * sum(y**2 for y in b)**0.5)
+
+def get_minilm_embedding(text, model):
+    return model.encode([text])[0]
+
+def retrieve_similar_pages(query, embedding_provider, index, c, top_k=10):
+    query_embedding = embedding_provider.get_embedding(query)
+
+    if query_embedding is None:
+        return []
+
+    query_embedding = np.array(query_embedding).reshape(1, -1)
+    distances, indices = index.search(query_embedding, top_k)
+    
+    idx_tuples = [(int(idx),) for idx in indices[0]]
+    c.execute('SELECT url, title FROM metadata WHERE faiss_index IN ({seq})'.format(
+        seq=','.join(['?'] * len(idx_tuples))), [x[0] for x in idx_tuples])
+
+    results = c.fetchall()
+    return results
+
 def main():
     query = "מהם האחוזים לשעת עבודה ביום שבת?"
-    # query = "פינוי דייר מהדירה באמצע חוזה השכירות"
-    # query = "איפה ניתן לבצע את הבחירות ברשות המקומית?"
     top_k = 10
-
-    # Load model
-    model = load_model()
 
     # Setup database
     conn, c = setup_database()
 
+    # Initialize embedding provider
+    embedding_provider = get_embedding_provider(EMBEDDING_PROVIDER)
+
     # Load FAISS index
     index = load_faiss_index()
 
-    # Retrieve similar pages
-    results = retrieve_similar_pages(query, model, index, c, top_k)
-    # context = ""
-    for url, title in results:
-        content = retrieve_content_by_url(url, c)
-        # context += f"Title: {title}, Content: {content[:200]}...\n"  # Collect context from top results
-    context_text = "\n".join([f"Title: {title}, Content: {content[:5000]}" for url, title in results])
+    # Retrieve similar pages using the selected provider
+    results = retrieve_similar_pages(query, embedding_provider, index, c, top_k)
+    
+    context_text = "\n".join([f"Title: {title}, Content: {retrieve_content_by_url(url, c)[:5000]}" for url, title in results])
     print("Context text:", context_text)
     response = get_openai_response(query, context_text)
     print(f"OpenAI Response: {response}")

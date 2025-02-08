@@ -12,7 +12,8 @@ c.execute('''
         id TEXT PRIMARY KEY,
         url TEXT,
         title TEXT,
-        content TEXT
+        content TEXT,
+        word_count INTEGER
     )
 ''')
 conn.commit()
@@ -26,10 +27,11 @@ def generate_hash(url):
 # Function to save page content to SQLite
 def save_to_db(url, title, content):
     page_hash = generate_hash(url)
+    word_count = len(content.split())
     c.execute('''
-        INSERT OR REPLACE INTO pages (id, url, title, content)
-        VALUES (?, ?, ?, ?)
-    ''', (page_hash, url, title, content))
+        INSERT OR REPLACE INTO pages (id, url, title, content, word_count)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (page_hash, url, title, content, word_count))
     conn.commit()
 
 
@@ -48,17 +50,33 @@ def scrape_page(base_url, url, visited, depth, max_depth=2):
     article = soup.find('article', {'id': 'bodyContent', 'role': 'main'})
     if article:
         print("Found article")
-        content = article.get_text(separator=' ', strip=True)
+        portal_boxes = article.find('div', {'class': 'portal-boxes-table'})
+        if portal_boxes:
+            print("Found portal boxes")
+            links_to_scrape = portal_boxes.find_all('a', href=True)
+            for link in links_to_scrape:
+                link_url = link['href']
+                if link_url.startswith("/he/"):
+                    scrape_page(base_url, link_url, visited, depth + 1)
+        else:
+            print("No portal boxes found, scraping content")
+            content_div = article.find('div', {'class': 'mw-parser-output'})
+            if content_div:
+                content = content_div.get_text(separator=' ', strip=True)
+                title = soup.find('title').text.strip()
+                save_to_db(full_url, title, content)
+            else:
+                print("No content div found")
     else:
         print("No article found")
         content = soup.get_text(separator=' ', strip=True)
+        title = soup.find('title').text.strip()
+        save_to_db(full_url, title, content)
 
-    title = soup.find('title').text.strip()
-    save_to_db(full_url, title, content)
     visited.add(url)
 
     # Find and scrape all linked pages
-    if depth < max_depth:
+    if depth < max_depth and not portal_boxes:
         links_to_scrape = article.find_all('a', href=True) if article else soup.find_all('a', href=True)
         for link in links_to_scrape:
             link_url = link['href']
@@ -71,7 +89,7 @@ def main():
     base_url = "https://www.kolzchut.org.il/he/%D7%A2%D7%9E%D7%95%D7%93_%D7%A8%D7%90%D7%A9%D7%99"
     start_url = "/he/%D7%A2%D7%9E%D7%95%D7%93_%D7%A8%D7%90%D7%A9%D7%99"
     visited = set()
-    max_depth = 3
+    max_depth = 2
     print("Starting scrape...")
     scrape_page(base_url, start_url, visited, depth=0, max_depth=max_depth)
     print(f"Scraped {len(visited)} pages.")
