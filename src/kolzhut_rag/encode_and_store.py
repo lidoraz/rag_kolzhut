@@ -12,7 +12,7 @@ from consts import EMBEDDING_PROVIDER
 
 # SQLite setup
 def setup_database():
-    conn = sqlite3.connect('kolzchut.db')
+    conn = sqlite3.connect('kolzchut.db', check_same_thread=False)
     c = conn.cursor()
     return conn, c
 

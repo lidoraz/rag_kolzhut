@@ -1,0 +1,99 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    background: linear-gradient(to top right, #003366, #4d4d4d, #001a33) no-repeat;
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    color: #333;
+}
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    min-width: 400px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+h1 {
+    margin-bottom: 20px;
+}
+textarea {
+    width: calc(100% - 20px); /* Adjust width to respect left padding */
+    height: 100px;
+    padding: 10px;
+    margin: 0 auto 20px auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    resize: none;
+    display: block;
+    direction: rtl;
+    text-align: right;
+}
+button {
+    position: relative;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+button:hover {
+    background-color: #0056b3;
+}
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.response-box {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: right;
+    direction: rtl;
+    min-height: 100px;
+    min-width: 100%;
+    box-sizing: border-box;
+}
+.about-container {
+    margin-top: 20px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.about-container a {
+    color: #007bff;
+    text-decoration: none;
+}
+.about-container a:hover {
+    text-decoration: underline;
+}

@@ -26,11 +26,12 @@ def get_openai_api_key():
 client = OpenAI(api_key=get_openai_api_key())
 
 
-def get_openai_response(user_query, context_text):
+def get_openai_response(user_query, context_text, model):
+    assert model in ('gpt-4o-mini', 'gpt-4o')
     try:
         # Call GPT-4o-mini
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=model,
             messages=[
                 {"role": "system",
                  "content": "You are an AI assistant helping users with their queries using relevant retrieved context."},
@@ -80,7 +81,10 @@ def retrieve_similar_pages(query, embedding_provider, index, c, top_k=10):
 
 def main():
     query = "מהם האחוזים לשעת עבודה ביום שבת?"
-    top_k = 10
+    query = "כמה ימים דמי אבטלה מקבלים אחרי גיל 50 ?" # 300
+    query = "מה עושים עם הכספים של הפנסיה אחרי שאתה נפטר ולא הספקת לקבל את הכל?"
+
+    top_k = 5
 
     # Setup database
     conn, c = setup_database()

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KolZhut AI - שאל על הזכויות שלך!</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>KolZhut AI - שאל על הזכויות שלך!</h1>
+        <textarea id="query" placeholder="הקלד את השאלה שלך כאן..."></textarea>
+        <button id="sendButton" onclick="sendQuery()">
+            <span id="buttonText">שלח</span>
+            <div id="spinner" class="spinner" style="display: none;"></div>
+        </button>
+        <div id="response" class="response-box" style="display: none;"></div>
+        <div class="about-container">
+            <p>לקחנו את אתר <a href="https://www.kolzchut.org.il" target="_blank">כל זכות</a>, והכנסו לו קצת 🚀!</p>
+        </div>
+    </div>
+    <script>
+        async function sendQuery() {
+            const query = document.getElementById('query').value;
+            const responseBox = document.getElementById('response');
+            const sendButton = document.getElementById('sendButton');
+            const buttonText = document.getElementById('buttonText');
+            const spinner = document.getElementById('spinner');
+
+            responseBox.style.display = 'none';
+            responseBox.innerHTML = '';
+            buttonText.style.display = 'none';
+            spinner.style.display = 'block';
+
+            const response = await fetch('http://127.0.0.1:8000/api/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query })
+            });
+
+            const data = await response.json();
+            responseBox.style.display = 'block';
+            responseBox.innerHTML = data.response;
+            buttonText.style.display = 'block';
+            spinner.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
