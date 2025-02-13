@@ -82,18 +82,3 @@ button:hover {
     min-width: 100%;
     box-sizing: border-box;
 }
-.about-container {
-    margin-top: 20px;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-.about-container a {
-    color: #007bff;
-    text-decoration: none;
-}
-.about-container a:hover {
-    text-decoration: underline;
-}

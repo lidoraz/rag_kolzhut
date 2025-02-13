@@ -132,6 +132,7 @@ def prepare_data(pages, model):
 # Initialize FAISS index
 def initialize_faiss_index(vectors):
     d = vectors.shape[1]  # Dimension of the vectors
+    # TODO: Switch to Cosine similarity as it is more suitable for embeddings, must normalize vectors first
     index = faiss.IndexFlatL2(d)
     index.add(vectors)
     return index

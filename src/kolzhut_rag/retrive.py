@@ -4,6 +4,7 @@ from openai import OpenAI
 import os
 import numpy as np
 import json
+from datetime import date
 from encode_and_store import setup_database, retrieve_content_by_url, get_embedding_provider
 from consts import EMBEDDING_PROVIDER
 
@@ -25,8 +26,23 @@ def get_openai_api_key():
 
 client = OpenAI(api_key=get_openai_api_key())
 
+import re
+
+
+def markdown_to_html(text):
+    # Convert **bold** to <b>bold</b>
+    text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+
+    # Convert \n to <br>
+    text = text.replace('\n', '<br>')
+
+    return text
+
+
+
 
 def get_openai_response(user_query, context_text, model):
+    print("Getting OpenAI response")
     assert model in ('gpt-4o-mini', 'gpt-4o')
     try:
         # Call GPT-4o-mini
@@ -34,12 +50,15 @@ def get_openai_response(user_query, context_text, model):
             model=model,
             messages=[
                 {"role": "system",
-                 "content": "You are an AI assistant helping users with their queries using relevant retrieved context."},
+                 "content": "You are an AI assistant helping users with their queries using relevant retrieved context."
+                            " Format your responses with appropriate line breaks for better readability."
+                            " For reference, today date is <TODAY>{today_date}</TODAY>".format(today_date=date.today())},
                 {"role": "user", "content": f"Context:\n{context_text}\n\nQuestion: {user_query}"}
             ]
         )
-
-        return response.choices[0].message.content
+        print("Got OpenAI response")
+        content = response.choices[0].message.content
+        return markdown_to_html(content)
     except Exception as e:
         print(f"Error getting OpenAI response: {e}")
         return "Error: Failed to get response from OpenAI"
