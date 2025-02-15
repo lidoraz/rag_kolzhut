@@ -52,11 +52,20 @@
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
+            let isBold = false;
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                const chunk = decoder.decode(value);
+                let chunk = decoder.decode(value);
+                chunk = chunk.replace(/\n/g, '<br>');  // Replace newline characters with <br>
+
+                // Handle bold text
+                chunk = chunk.replace(/\*\*/g, () => {
+                    isBold = !isBold;
+                    return isBold ? '<strong>' : '</strong>';
+                });
+
                 responseBox.style.display = 'block';
                 responseBox.innerHTML += chunk;
             }

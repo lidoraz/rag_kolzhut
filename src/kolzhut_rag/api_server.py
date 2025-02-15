@@ -45,9 +45,9 @@ def query():
     def generate():
         for chunk in res:
             content_delta = chunk.choices[0].delta.content
-            print(content_delta)
+            # print(content_delta)
             if content_delta:
-                yield markdown_to_html(content_delta).encode('utf-8')  # Encode chunk to bytes
+                yield content_delta.encode('utf-8')  # Encode chunk to bytes
 
 
     return Response(generate(), mimetype='text/event-stream')
