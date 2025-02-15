@@ -2,10 +2,10 @@ from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from encode_and_store import setup_database, retrieve_content_by_url, get_embedding_provider
-from retrive import load_faiss_index, get_openai_response, retrieve_similar_pages, \
+from kolzhut_rag.encode_and_store import setup_database, retrieve_content_by_url, get_embedding_provider
+from kolzhut_rag.retrive import load_faiss_index, get_openai_response, retrieve_similar_pages, \
     markdown_to_html  # , retrieve_similar_pages_cosine
-from consts import EMBEDDING_PROVIDER
+from kolzhut_rag.consts import EMBEDDING_PROVIDER
 
 app = Flask(__name__)
 CORS(app)
