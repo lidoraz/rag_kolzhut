@@ -40,9 +40,18 @@
                 body: JSON.stringify({ query })
             });
 
-            const data = await response.json();
-            responseBox.style.display = 'block';
-            responseBox.innerHTML = data.response;
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let result = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                result += decoder.decode(value);
+                responseBox.style.display = 'block';
+                responseBox.innerHTML += result;
+            }
+
             buttonText.style.display = 'block';
             spinner.style.display = 'none';
         }

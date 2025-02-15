@@ -7,7 +7,7 @@ import json
 import os
 from tqdm import tqdm
 from openai import OpenAI
-from consts import EMBEDDING_PROVIDER
+from kolzhut_rag.consts import EMBEDDING_PROVIDER
 
 
 # SQLite setup
