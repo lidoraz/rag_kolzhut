@@ -1,5 +1,6 @@
 import sqlite3
 import faiss
+from datetime import date
 from openai import OpenAI
 import os
 import numpy as np
@@ -45,15 +46,16 @@ def get_openai_response(user_query, context_text, model, stream=True):
             model=model,
             messages=[
                 {"role": "system",
-                 "content": "You are an AI assistant helping users with their queries using relevant retrieved context."},
+                 "content": "You are an AI assistant helping users with their queries using relevant retrieved context"
+                            f" For time reference, today's date is {date.today()}"
+                            f" You are not allowed to assist with any illegal activities."
+                            f" Answer only relevant answers relevant to the context provided."},
                 {"role": "user", "content": f"Context:\n{context_text}\n\nQuestion: {user_query}"}
             ],
             stream=stream
         )
         if stream:
-            for chunk in response:
-                if len(chunk.choices) > 0:
-                    yield chunk.choices[0].delta.content
+            return response
         else:
             return response.choices[0].message.content
     except Exception as e:
